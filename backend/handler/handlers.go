@@ -27,7 +27,7 @@ func CreateShortLink(c *gin.Context) {
 	host := os.Getenv("BASE_URL")
 	c.JSON(200, gin.H{
 		"success":   true,
-		"short_url": host + shortUrl,
+		"short_url": host + "/" + shortUrl,
 	})
 }
 
