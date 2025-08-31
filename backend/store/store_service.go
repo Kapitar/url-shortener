@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"log"
 	"os"
@@ -29,11 +30,21 @@ func newRedis() *redis.Client {
 		log.Fatalf("invalid redis url: %v", err)
 	}
 
+	// --- TLS/SNI setup ---
 	if opt.TLSConfig == nil {
 		opt.TLSConfig = &tls.Config{}
 	}
-	opt.TLSConfig.ServerName = os.Getenv("REDIS_TLS_SERVER_NAME")
+
+	// Load host root CAs explicitly (defensive in minimal images)
+	roots, err := x509.SystemCertPool()
+	if err != nil || roots == nil {
+		roots = x509.NewCertPool()
+	}
+	opt.TLSConfig.RootCAs = roots
 	opt.TLSConfig.MinVersion = tls.VersionTLS12
+
+	// Make sure SNI ServerName matches the hostname (not an IP)
+	opt.TLSConfig.ServerName = os.Getenv("REDIS_TLS_SERVER_NAME")
 
 	return redis.NewClient(opt)
 }
