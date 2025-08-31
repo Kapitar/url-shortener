@@ -12,7 +12,6 @@ import (
 
 type UrlCreationRequest struct {
 	OriginalUrl string `json:"original_url" binding:"required,url"`
-	UserId      string `json:"user_id" binding:"required,uuid"`
 }
 
 func CreateShortLink(c *gin.Context) {
@@ -22,8 +21,8 @@ func CreateShortLink(c *gin.Context) {
 		return
 	}
 
-	shortUrl := shortener.GenerateShortLink(creationRequest.OriginalUrl, creationRequest.UserId)
-	store.SaveUrlMapping(shortUrl, creationRequest.OriginalUrl, creationRequest.UserId)
+	shortUrl := shortener.GenerateShortLink(creationRequest.OriginalUrl)
+	store.SaveUrlMapping(shortUrl, creationRequest.OriginalUrl)
 	host := os.Getenv("BASE_URL")
 	c.JSON(200, gin.H{
 		"success":   true,

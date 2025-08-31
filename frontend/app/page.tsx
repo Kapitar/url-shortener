@@ -25,7 +25,6 @@ export default function Home() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           original_url: longUrl,
-          user_id: "fd7ba4bc-6a61-4387-b596-e577507c8dd4",
         }),
       });
 
