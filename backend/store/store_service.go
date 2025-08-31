@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"log"
-	"net"
 	"os"
 
 	"github.com/go-redis/redis/v8"
@@ -33,8 +32,7 @@ func newRedis() *redis.Client {
 	if opt.TLSConfig == nil {
 		opt.TLSConfig = &tls.Config{}
 	}
-	host, _, _ := net.SplitHostPort(opt.Addr)
-	opt.TLSConfig.ServerName = host
+	opt.TLSConfig.ServerName = os.Getenv("REDIS_TLS_SERVER_NAME")
 	opt.TLSConfig.MinVersion = tls.VersionTLS12
 
 	return redis.NewClient(opt)
