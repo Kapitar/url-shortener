@@ -2,8 +2,10 @@ package store
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net"
 	"os"
 
 	"github.com/go-redis/redis/v8"
@@ -18,15 +20,28 @@ var (
 	ctx          = context.Background()
 )
 
-func InitializeStore() *StorageService {
-	redisURL := os.Getenv("REDIS_URL")
-
-	opt, err := redis.ParseURL(redisURL)
+func newRedis() *redis.Client {
+	url := os.Getenv("REDIS_TLS_URL")
+	if url == "" {
+		url = os.Getenv("REDIS_URL")
+	}
+	opt, err := redis.ParseURL(url)
 	if err != nil {
 		log.Fatalf("invalid redis url: %v", err)
 	}
 
-	redisClient := redis.NewClient(opt)
+	if opt.TLSConfig == nil {
+		opt.TLSConfig = &tls.Config{}
+	}
+	host, _, _ := net.SplitHostPort(opt.Addr)
+	opt.TLSConfig.ServerName = host
+	opt.TLSConfig.MinVersion = tls.VersionTLS12
+
+	return redis.NewClient(opt)
+}
+
+func InitializeStore() *StorageService {
+	redisClient := newRedis()
 
 	pong, err := redisClient.Ping(ctx).Result()
 	if err != nil {
