@@ -1,8 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"github.com/Kapitar/url-shortener/handler"
@@ -13,10 +13,7 @@ import (
 )
 
 func main() {
-	dotEnvErr := godotenv.Load()
-	if dotEnvErr != nil {
-		log.Fatal("Error loading .env file")
-	}
+	_ = godotenv.Load()
 
 	r := gin.Default()
 
@@ -29,6 +26,8 @@ func main() {
 		MaxAge:           12 * time.Hour,
 	}))
 
+	r.GET("/health", func(c *gin.Context) { c.String(200, "ok") })
+
 	r.POST("/create-short-url", func(c *gin.Context) {
 		handler.CreateShortLink(c)
 	})
@@ -39,8 +38,12 @@ func main() {
 
 	store.InitializeStore()
 
-	err := r.Run(":8080")
-	if err != nil {
-		panic(fmt.Sprintf("Failed to start server: %v", err))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "3000" // local fallback
+	}
+	addr := "0.0.0.0:" + port
+	if err := r.Run(addr); err != nil {
+		log.Fatalf("Failed to start server on %s: %v", addr, err)
 	}
 }
