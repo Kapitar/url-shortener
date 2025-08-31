@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
+import ClipLoader from "react-spinners/ClipLoader";
 
 export default function Home() {
   const [loading, setLoading] = useState(false);
@@ -10,11 +11,13 @@ export default function Home() {
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
+    setLink("");
+
     const formData = new FormData(e.currentTarget);
     const longUrl = formData.get("long-url") as string;
     const BASE_URL = process.env.NEXT_PUBLIC_BASE_BACKEND;
     try {
-      setError("");
       const res = await fetch(`${BASE_URL}/create-short-url`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,6 +56,18 @@ export default function Home() {
             submit
           </button>
         </form>
+
+        {loading && (
+          <div className="w-full flex justify-center mt-4">
+            <ClipLoader
+              color={"#ffffff"}
+              loading={loading}
+              size={50}
+              aria-label="Loading Spinner"
+              data-testid="loader"
+            />
+          </div>
+        )}
 
         {link !== "" && (
           <div className="w-full flex justify-between items-center p-4 mt-8 mx-auto rounded-2xl bg-green-600">
