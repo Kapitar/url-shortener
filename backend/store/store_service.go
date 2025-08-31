@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/go-redis/redis/v8"
@@ -18,11 +19,14 @@ var (
 )
 
 func InitializeStore() *StorageService {
-	redisClient := redis.NewClient(&redis.Options{
-		Addr:     os.Getenv("REDIS_HOST"),
-		Password: os.Getenv("REDIS_PASSWORD"),
-		DB:       0,
-	})
+	redisURL := os.Getenv("REDIS_URL")
+
+	opt, err := redis.ParseURL(redisURL)
+	if err != nil {
+		log.Fatalf("invalid redis url: %v", err)
+	}
+
+	redisClient := redis.NewClient(opt)
 
 	pong, err := redisClient.Ping(ctx).Result()
 	if err != nil {
