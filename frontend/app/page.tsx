@@ -7,11 +7,13 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("");
   const [error, setError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const onSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    setCopied(false);
     setLink("");
 
     const formData = new FormData(e.currentTarget);
@@ -79,9 +81,10 @@ export default function Home() {
               className="bg-white text-black rounded-xl px-4 py-2 text-md cursor-pointer"
               onClick={() => {
                 navigator.clipboard.writeText(link);
+                setCopied(true);
               }}
             >
-              Copy
+              {!copied ? "Copy" : "Copied!"}
             </button>
           </div>
         )}
